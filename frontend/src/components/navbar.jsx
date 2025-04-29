@@ -55,7 +55,7 @@ const Navbar = () => {
 
             <nav className="flex justify-center space-x-6 p-4 pt-0">
                 <ul className="flex space-x-6 " id="nav-items">
-                    <li><a href="#Electronics" className="nav-link hover:bg-lime-600 hover:text-white p-2 rounded-lg">Electronics</a></li>
+                    <li><a href="#Electronics" className="nav-link hover:bg-lime-600 hover:text-white p-2 rounded-lg"></a></li>
                     <li><a href="#Beauty" className="nav-link hover:bg-lime-600 hover:text-white p-2 rounded-lg">Beauty</a></li>
                     <li><a href="#Books" className="nav-link hover:bg-lime-600 hover:text-white p-2 rounded-lg">Books</a></li>
                     <li><a href="#Grocery Items" className="nav-link hover:bg-lime-600 hover:text-white p-2 rounded-lg">Grocery Items</a></li>

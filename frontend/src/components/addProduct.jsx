@@ -19,11 +19,11 @@ const AddProduct = () => {
 
 
   return (
-    <div className="flex items-center justify-center bg-gray-900 text-white h-[570px]">
+    <div className="flex items-center justify-center bg-gray-900 text-white h-screen">
       <div className="bg-gray-800 p-6 rounded-2xl w-full max-w-md shadow-lg overflow-y-auto">
         <h2 className="text-2xl font-bold text-green-400 mb-6 text-center">Add Product</h2>
 
-        <form onSubmit={handleSubmit} encType="multipart/form-data" className="flex flex-col gap-y-4">
+        <form encType="multipart/form-data" className="flex flex-col gap-y-4">
 
           <div className="flex flex-col">
             <label className="text-sm font-medium mb-1">Select Category</label>
@@ -33,7 +33,7 @@ const AddProduct = () => {
               className="p-2 rounded bg-white text-black"
               required
             >
-              <option value="">Select Category</option>
+              <option value="" disabled>Select Category</option>
               <option value="Electronics">Electronics</option>
               <option value="Beauty">Beauty</option>
               <option value="Books">Books</option>
@@ -98,6 +98,7 @@ const AddProduct = () => {
 
         </form>
       </div>
+   
     </div>
   );
 };
