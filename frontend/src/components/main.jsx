@@ -21,7 +21,6 @@ const Main = () => {
     };
 
     const closeDetail = () => {
-        // console.log("ggg");
         setSelectedProduct(null);
     };
 

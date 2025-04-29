@@ -32,7 +32,6 @@ const Navbar = () => {
 
     return (
         <>
-
         {cart && <div className="cart-container"> <Cart/></div>}
         <div className="fixed w-full top-0 bg-white shadow bg-gray">
             <nav className="flex justify-between items-center p-4 pt-2">
