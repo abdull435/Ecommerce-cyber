@@ -1,0 +1,53 @@
+const express = require('express');
+const db = require('./db');
+const multer = require('multer');
+const cors = require('cors');
+const path = require('path');
+const app = express();
+const PORT = 3000;
+
+app.use(cors());
+app.use(express.json());  
+
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'images/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+
+const upload = multer({ storage });
+
+// API to handle product upload
+app.post('/add-product', upload.single('image'), (req, res) => {
+  const { name, description, price, category } = req.body;
+  const image = req.file ? req.file.filename : null;
+
+  const sql = 'INSERT INTO products (name, description, price, category,imgaddress) VALUES (?, ?, ?, ?, ?)';
+  db.query(sql, [name, description, price, category,image], (err, result) => {
+    if (err) {
+      console.error('Error inserting product:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+    res.status(200).json({ message: 'Product saved!', productId: result.insertId });
+  });
+});
+
+app.get('/home', (req, res) => {
+  const sql = 'SELECT * FROM products';
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error('Error fetching products:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+    res.status(200).json({p : result});
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});

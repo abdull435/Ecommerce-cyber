@@ -96,7 +96,7 @@ const AddProduct = () => {
             />
           </div>
 
-          <button type="submit" className="bg-green-500 hover:bg-green-600 p-2 rounded font-bold">
+          <button type="submit" className="bg-green-500 hover:bg-green-600 p-2 rounded font-bold cursor-pointer">
             Add Product
           </button>
         </form>

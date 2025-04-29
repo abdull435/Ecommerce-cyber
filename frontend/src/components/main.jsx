@@ -35,11 +35,11 @@ const Main = () => {
                         {products.filter(p => p.category === category)
                             .map(p =>
                                 <div className="bg-white shadow rounded-lg overflow-hidden bg-lime-50">
-                                    <img src="./images/pizza.png" alt="Pizza" className="w-full h-55 object-cover" />
+                                    <img src={`http://localhost:3000/images/${p.imgaddress}`} alt="error to load image" className="w-full h-55 object-cover" />
                                     <div className="p-4">
-                                        <h3 className="text-lg text-blue-600 font-bold">{p.product_name}</h3>
+                                        <h3 className="text-lg text-blue-600 font-bold">{p.name}</h3>
                                         <p>{p.description}</p>
-                                        <p className="text-lime-600"><strong className="text-black">Starting: </strong>Rs. {p.strting_price}</p>
+                                        <p className="text-lime-600"><strong className="text-black">Starting: </strong>Rs. {p.price}</p>
 
                                         <button onClick={()=>showDetails(p)} className="bg-lime-600 w-full font-bold p-1.5 mt-2 rounded-xl text-white cursor-pointer" value={p.id}>Add To
                                             Cart</button>
