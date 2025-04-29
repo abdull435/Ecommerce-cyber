@@ -34,6 +34,23 @@ const AddProduct = () => {
         <h2 className="text-2xl font-bold text-green-400 mb-6 text-center">Add Product</h2>
         <form onSubmit={handleSubmit} encType="multipart/form-data" className="flex flex-col space-y-4">
 
+          
+        <div className="flex flex-col">
+            <label className="mb-1">Category</label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="p-2 rounded bg-white text-black"
+              required
+            >
+              <option value="">Select Category</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Beauty">Beauty</option>
+              <option value="Books">Books</option>
+              <option value="Grocery">Grocery</option>
+            </select>
+          </div>
+          
           <div className="flex flex-col">
             <label className="mb-1">Product Name</label>
             <input
@@ -67,21 +84,6 @@ const AddProduct = () => {
             />
           </div>
 
-          <div className="flex flex-col">
-            <label className="mb-1">Category</label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="p-2 rounded bg-white text-black"
-              required
-            >
-              <option value="">Select Category</option>
-              <option value="Electronics">Electronics</option>
-              <option value="Beauty">Beauty</option>
-              <option value="Books">Books</option>
-              <option value="Grocery">Grocery</option>
-            </select>
-          </div>
 
           <div className="flex flex-col">
             <label className="mb-1">Image</label>
