@@ -18,7 +18,7 @@ const Navbar = () => {
             if (!event.target.closest(".cart-container") && !event.target.closest(".cart-button")) {
                 setCart(false);
             }
-        };
+        }; 
 
         document.addEventListener("click", handleClickOutside);
 
