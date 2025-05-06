@@ -28,7 +28,7 @@ const Signup = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
       <div className="bg-gray-800 p-6 rounded-2xl w-full max-w-md shadow-lg">
         <h2 className="text-2xl font-bold text-green-400 mb-6 text-center">Sign Up</h2>
-        <form className="flex flex-col space-y-4">
+        <form onSubmit={handleVerify} className="flex flex-col space-y-4" >
           
           <div className="flex flex-col">
             <label className="mb-1">Name</label>
