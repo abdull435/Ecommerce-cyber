@@ -8,6 +8,22 @@ const Signup = () => {
   const [email,setEmail]=useState('');
   const [password,setPassword]=useState('');
 
+  const handleVerify = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await axios.post('http://localhost:3000/verify', {
+        email,
+        code,
+      });
+
+      alert(res.data.message);
+    } catch (err) {
+      console.error(err);
+      alert('Verification failed.');
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
       <div className="bg-gray-800 p-6 rounded-2xl w-full max-w-md shadow-lg">
