@@ -4,6 +4,7 @@ const verificationEmail = require('./mailer');
 const multer = require('multer');
 const cors = require('cors');
 const crypto = require('crypto');
+const session = require('express-session');
 const path = require('path');
 const app = express();
 const PORT = 3000;
@@ -23,6 +24,13 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+
+app.use(session({
+  secret: 'your-secret-key', // Change this to a strong secret in production
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Set to true only if using HTTPS
+}));
 
 // API to handle product upload
 app.post('/add-product', upload.single('image'), (req, res) => {
