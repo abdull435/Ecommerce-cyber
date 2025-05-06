@@ -1,8 +1,10 @@
 import {useEffect, useState } from 'react';
 import axios from 'axios';
 import Cart from './Cart';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
+    const navigate = useNavigate();
     const [cart, setCart] = useState(false);
     const [isLoggedin,setIsLoggedin]=useState(false);
     const displayCart=(e)=>{
@@ -24,6 +26,16 @@ const Navbar = () => {
       useEffect(() => {
         checkLoginStatus();
       }, []);
+
+      const handleLogout = async () => {
+        try {
+          await axios.post('http://localhost:3000/logout', {}, { withCredentials: true });
+          setIsLoggedin(false);
+        } catch (err) {
+          console.error('Error logging out', err);
+        }
+      };
+      
 
     useEffect(() => {
         if (!cart) return;
@@ -62,8 +74,8 @@ const Navbar = () => {
                 </ul>
                 <div className="flex space-x-4">
                     <img src="./images/cart.png" alt="cart" className="h-9 cursor-pointer" onClick={displayCart}/>
-                    {isLoggedin?(<button className="h-10 cursor-pointer " >👤 Logout</button>):
-                        <button className="h-10 cursor-pointer " >👤 Login</button>
+                    {isLoggedin?(<button className="h-10 cursor-pointer" onClick={()=>handleLogout()}>👤 Logout</button>):
+                        <button className="h-10 cursor-pointer " onClick={()=>navigate('/signin')}>👤 Login</button>
                     }
                 </div>
             </nav>

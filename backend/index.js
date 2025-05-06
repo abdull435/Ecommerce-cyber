@@ -132,6 +132,26 @@ app.post('/login', (req, res) => {
   });
 });
 
+app.get('/checklogin', (req, res) => {
+  if (req.session.userId) {
+    res.status(200).json({
+      loggedIn: true
+    });
+  } else {
+    res.status(200).json({ loggedIn: false });
+  }
+});
+
+app.post('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Failed to log out' });
+    }
+    res.status(200).json({ message: 'Logged out successfully' });
+  });
+});
+
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
