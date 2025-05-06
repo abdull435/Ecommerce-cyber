@@ -3,13 +3,15 @@ import axios from 'axios';
 const Cart=()=>{
 
     const [cartData,setCartData]=useState([]);
+    const [subTotal,setSubTotal]=useState(0);
+    const [total,setTotal]=useState(0);
     
     const increase = (index) => {
         setCartData(prv=>(            
             prv.map(((item,i)=>(
                 index ===i?{...item,
-                    qty: item.qty+1,
-                    Total: item.Price*(item.qty+1)
+                    quantity: item.quantity+1,
+                    total: item.pricePerItem*(item.quantity+1)
                 }
                 :
                 item
@@ -21,8 +23,8 @@ const Cart=()=>{
         setCartData(prv=>(            
             prv.map(((item,i)=>(
                 index ===i?{...item,
-                    qty: item.qty>1? item.qty-1:item.qty,
-                    Total: item.qty>1? item.Price*(item.qty-1): item.Price
+                    quantity: item.quantity>1? item.quantity-1:item.quantity,
+                    total: item.quantity>1? item.pricePerItem*(item.quantity-1): item.pricePerItem
                 }
                 :
                 item
@@ -39,8 +41,9 @@ const Cart=()=>{
 
     const removeItem=(e,id)=>{
         e.stopPropagation();
+        // console.log(id);
         setCartData((prevCart) => {
-            const updatedCart = prevCart.filter((item) => item.Product.id !== id);
+            const updatedCart = prevCart.filter((item) => item.id !== id);
     
             // Ensure API is called even if cart is empty
             axios.put(`http://localhost:3000/update-cart`, { cart: updatedCart }, { withCredentials: true })
@@ -54,10 +57,20 @@ const Cart=()=>{
 
     useEffect(()=>{
         axios.get(`http://localhost:3000/get-cart`,{ withCredentials: true })
-            .then(response=>{setCartData(response.data.cart)
+            .then(response=>{setCartData(response.data.cartData)
             })
             .catch(error=> console.error("Error to fetching: ",error));
     },[]);
+
+    useEffect(() => {
+        const subtotal = cartData.reduce((acc, item) => acc + item.total, 0);
+        const deliveryCharges = 150; // Example static delivery charge
+        const tax = subtotal * 0.15; // 15% tax
+        const grandTotal = subtotal + deliveryCharges + tax;
+
+        setSubTotal(subtotal);
+        setTotal(grandTotal);
+    }, [cartData]);
 
     return(
 
@@ -70,27 +83,21 @@ const Cart=()=>{
             <div className="border-b py-4">
                 <div className="flex items-start space-x-4">   
                             <div className="flex-1">
-                            <h3 className="font-bold">{data.Product.product_name}</h3>
-                            <p className="text-sm text-gray-500">{data.Product.description}</p>
-                            {data.items && Object.entries(data?.items).map(([optionType, optionDetails]) => (
-                            <ul className="text-sm text-gray-600">
-                                <li><strong>{optionType}</strong> {optionDetails?.name} <strong>Rs.</strong>{optionDetails?.price}</li>
-                              </ul>
-                            ))}
-                           
+                            <h3 className="font-bold">{data.name}</h3>
+                            <p className="text-sm text-gray-500">{data.description}</p>
                             </div>
                     <div className="text-right">
-                        <p className="font-bold">Rs. {data.Total}</p>
+                        <p className="font-bold">Rs. {data.total}</p>
                     </div>
                 </div>
                 <div className="flex justify-between mt-2">
                     <div>
                         <button onClick={()=>decrease(index)} className="cursor-pointer bg-lime-600 text-white px-2 py-1 rounded">-</button>
-                        <input type="number" min="1" disabled step="1" value={data.qty} className="w-8 text-center mx-1 border rounded" />
+                        <input type="number" min="1" disabled step="1" value={data.quantity} className="w-8 text-center mx-1 border rounded" />
                         <button onClick={()=>increase(index)} className="cursor-pointer bg-lime-600 text-white px-2 py-1 rounded">+</button>
                     </div>
                     <div>
-                        <button onClick={(e)=>removeItem(e,data.Product.id)} className="cursor-pointer bg-lime-600 text-white px-2 py-1 rounded">🗑</button>
+                        <button onClick={(e)=>removeItem(e,data.id)} className="cursor-pointer bg-lime-600 text-white px-2 py-1 rounded">🗑</button>
                     </div>
                 </div>
             </div>
@@ -99,10 +106,10 @@ const Cart=()=>{
         </div>
 
         <div className="pt-4">
-            <p className="flex justify-between text-sm"><span>Subtotal</span> <span>Rs. 605.00</span></p>
-            <p className="flex justify-between text-sm"><span>Delivery Charges</span> <span>Rs. 150.00</span></p>
-            <p className="flex justify-between text-sm"><span>Tax (15%)</span> <span>Rs. 90.75</span></p>
-            <p className="flex justify-between font-bold text-lg mt-2"><span>Grand Total</span> <span>Rs. 845.75</span></p>
+            <p className="flex justify-between text-sm"><span>Subtotal</span> <span>Rs. {subTotal}</span></p>
+            <p className="flex justify-between text-sm"><span>Delivery Charges</span> <span>Rs. 150</span></p>
+            <p className="flex justify-between text-sm"><span>Tax (15%)</span> <span>Rs. {subTotal*0.15}</span></p>
+            <p className="flex justify-between font-bold text-lg mt-2"><span>Grand Total</span> <span>Rs. {total}</span></p>
         </div>
         <button className="bg-lime-600 text-white w-full py-2 rounded-lg mt-4">Checkout</button>
     </div>

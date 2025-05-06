@@ -37,6 +37,7 @@ app.use(session({
 
 // API to handle product upload
 app.post('/add-product', upload.single('image'), (req, res) => {
+  
   const { name, description, price, category } = req.body;
   const image = req.file ? req.file.filename : null;
 
@@ -152,30 +153,28 @@ app.post('/logout', (req, res) => {
 });
 
 app.post('/add-to-cart', (req, res) => {
-  console.log(req.body.Description);
-  // if (!req.session.userId) {
-  //   return res.status(401).json({ message: 'Please log in to add items to cart.' });
-  // }
+   const { Id, Name, Description, qty, Price, Total } = req.body;
 
-  const { Name, Description, qty, Price, Total } = req.body;
-
-
-
+   if(!req.session.userId){
+    return res.json({ message: 'You must be logged in to add items to your cart.' });
+  
+   }
   if (!req.session.cart) {
     req.session.cart = [];
   }
 
-  const existingItemIndex = req.session.cart.findIndex(item => item.name === Name);
+  const existingItemIndex = req.session.cart.findIndex(item => item.id === Id);
 
   if (existingItemIndex !== -1) {
-    // If the item already exists, update the quantity and total price
+    
     req.session.cart[existingItemIndex].quantity += qty;
     req.session.cart[existingItemIndex].total += Total;
-    // Optionally, update the price per item if needed
     req.session.cart[existingItemIndex].pricePerItem = Price;
+
   } else {
 
     const cartItem = {
+      id: Id,
       name: Name,
       description: Description,
       quantity: qty,
@@ -185,9 +184,29 @@ app.post('/add-to-cart', (req, res) => {
     req.session.cart.push(cartItem);
    
   }
-  console.log(req.session.cart);
 
-  res.status(200).json({ message: 'Item added to cart.', cart: req.session.cart });
+  res.status(200).json({ message: 'Item added to cart.' });
+});
+
+app.get('/get-cart',(req,res)=>{
+  if (!req.session.cart) {
+    req.session.cart = [];
+  }
+
+  res.json({cartData: req.session.cart});
+
+});
+
+app.put('/update-cart', (req, res) => {
+  const { cart } = req.body;
+
+  if (!Array.isArray(cart)) {
+      return res.status(400).json({ error: 'Invalid cart data' });
+  }
+
+  req.session.cart = cart;
+
+  res.json({ message: 'Cart updated successfully', cart });
 });
 
 

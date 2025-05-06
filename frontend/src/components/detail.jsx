@@ -26,6 +26,10 @@ const Detail = ({ product, close }) => {
 
     const addToCart =()=>{
         axios.post(`http://localhost:3000/add-to-cart`,{Id: productId,Name: productName,Description: productDescription,qty: quantity,Price: price, Total: totalprice},{withCredentials: true})
+        .then(response => {
+            // Show success message from backend
+            alert(response.data?.message); // This is where the server's message gets displayed
+        })
         .catch(error => console.error("Error:", error));
     }
 
