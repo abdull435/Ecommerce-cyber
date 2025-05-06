@@ -13,6 +13,7 @@ const Signup = () => {
 
     try {
       const res = await axios.post('http://localhost:3000/verify', {
+        name,
         email,
         code,
       });
@@ -34,7 +35,7 @@ const Signup = () => {
             <label className="mb-1">Name</label>
             <input
               type="text"
-              value="name"
+              name="name"
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter Name"
               required
@@ -46,7 +47,7 @@ const Signup = () => {
             <label className="mb-1">Email</label>
             <input
               type="email"
-              value="email"
+              name="email"
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               required
@@ -58,7 +59,7 @@ const Signup = () => {
             <label className="mb-1">Password</label>
             <input
               type="password"
-              value="password"
+              name="password"
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required
