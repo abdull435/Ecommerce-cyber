@@ -1,148 +1,76 @@
-import { useState } from "react";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
-const Checkout = ({ totalAmount = 0 }) => {
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const [showCardFields, setShowCardFields] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    name: "",
-    address: "",
-    city: "",
-    ccNumber: "",
-    ccExpiration: "",
-    cvv: ""
+const Checkout = () => {
+  const [form, setForm] = useState({
+    email: '',
+    name: '',
+    city: '',
+    address: '',
+    paymentMethod: '',
   });
 
-  const handlePaymentToggle = (method) => {
-    setPaymentMethod(method);
-    setShowCardFields(method === "credit");
-  };
+  const [subTotal,setSubTotal]=useState(0);
+const [total,setTotal]=useState(0);
+  const [cartData, setCartData] = useState([]);
+
+  useEffect(() => {
+    // Fetch cart data from server
+    axios.get('http://localhost:3000/get-cart', { withCredentials: true })
+      .then(res => setCartData(res.data.cartData))
+      .catch(err => console.error("Error loading cart:", err));
+  }, []);
+
+  useEffect(() => {
+    const subtotal = cartData.reduce((acc, item) => acc + item.total, 0);
+    const deliveryCharges = 150; // Example static delivery charge
+    const tax = subtotal * 0.15; // 15% tax
+    const grandTotal = subtotal + deliveryCharges + tax;
+
+    setSubTotal(subtotal);
+    setTotal(grandTotal);
+}, [cartData]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleCheckout = async (e) => {
     e.preventDefault();
-    // Submit logic here
-    console.log({ ...formData, paymentMethod, totalAmount });
+
+    try {
+      const orderRes = await axios.post('http://localhost:3000/create-order', {
+        ...form,
+        total: total,
+        cart: cartData
+      }, { withCredentials: true });
+
+      alert(orderRes.data.message);
+      // Optionally clear cart or redirect
+    } catch (err) {
+      console.error("Checkout failed:", err);
+      alert("Something went wrong during checkout.");
+    }
   };
 
   return (
-    <div className="flex h-screen bg-black text-white">
-      <div className="flex-1 flex items-center justify-center bg-[#1a1a1a] p-6">
-        <form
-          onSubmit={handleSubmit}
-          className="w-full max-w-md bg-[#1a1a1a] space-y-4"
-        >
-          <h1 className="text-center text-3xl text-lime-400 mb-2">Checkout</h1>
-          <p className="text-center text-lg">Total: <strong>${totalAmount.toFixed(2)}</strong></p>
+    <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
+      <div className="bg-gray-800 p-6 rounded-2xl w-full max-w-md shadow-lg">
+        <h2 className="text-2xl font-bold text-green-400 mb-6 text-center">Checkout Total {total}</h2>
+        <form onSubmit={handleCheckout} className="flex flex-col space-y-4">
 
-          <input
-            type="email"
-            name="email"
-            placeholder="Email Address"
-            required
-            value={formData.email}
-            onChange={handleChange}
-            className="bg-gray-800 text-white p-2 rounded w-full"
-          />
+          <input name="email" type="email" required placeholder="Email" value={form.email} onChange={handleChange} className="p-2 bg-white text-black rounded" />
+          <input name="name" type="text" required placeholder="Full Name" value={form.name} onChange={handleChange} className="p-2 bg-white text-black rounded" />
+          <input name="address" type="text" required placeholder="Street Address" value={form.address} onChange={handleChange} className="p-2 bg-white text-black rounded" />
+          <input name="city" type="text" required placeholder="City" value={form.city} onChange={handleChange} className="p-2 bg-white text-black rounded" />
 
-          <input
-            type="text"
-            name="name"
-            placeholder="Full Name"
-            required
-            value={formData.name}
-            onChange={handleChange}
-            className="bg-gray-800 text-white p-2 rounded w-full"
-          />
+          <select name="paymentMethod" value={form.paymentMethod} onChange={handleChange} required className="p-2 bg-white text-black rounded">
+            <option value="">Select Payment Method</option>
+            <option value="credit">Credit Card</option>
+            <option value="cash">Cash on Delivery</option>
+          </select>
 
-          <input
-            type="text"
-            name="address"
-            placeholder="Street Address"
-            required
-            value={formData.address}
-            onChange={handleChange}
-            className="bg-gray-800 text-white p-2 rounded w-full"
-          />
-
-          <input
-            type="text"
-            name="city"
-            placeholder="City"
-            required
-            value={formData.city}
-            onChange={handleChange}
-            className="bg-gray-800 text-white p-2 rounded w-full"
-          />
-
-          <div className="flex gap-2">
-            <button
-              type="button"
-              className={`flex-1 p-2 rounded ${
-                paymentMethod === "credit"
-                  ? "bg-lime-400 text-black"
-                  : "bg-gray-800 text-white"
-              }`}
-              onClick={() => handlePaymentToggle("credit")}
-            >
-              Credit Card
-            </button>
-
-            <button
-              type="button"
-              className={`flex-1 p-2 rounded ${
-                paymentMethod === "cash"
-                  ? "bg-lime-400 text-black"
-                  : "bg-gray-800 text-white"
-              }`}
-              onClick={() => handlePaymentToggle("cash")}
-            >
-              Cash on Delivery
-            </button>
-          </div>
-
-          {showCardFields && (
-            <div className="space-y-2">
-              <input
-                type="text"
-                name="ccNumber"
-                placeholder="Credit Card Number"
-                value={formData.ccNumber}
-                onChange={handleChange}
-                className="bg-gray-800 text-white p-2 rounded w-full"
-              />
-
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  name="ccExpiration"
-                  placeholder="Expiration (MM/YY)"
-                  value={formData.ccExpiration}
-                  onChange={handleChange}
-                  className="bg-gray-800 text-white p-2 rounded w-full"
-                />
-                <input
-                  type="text"
-                  name="cvv"
-                  placeholder="CVV"
-                  value={formData.cvv}
-                  onChange={handleChange}
-                  className="bg-gray-800 text-white p-2 rounded w-full"
-                />
-              </div>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            className="w-full p-2 bg-lime-400 text-black font-semibold rounded"
-          >
-            Proceed
-          </button>
+          <button type="submit" className="bg-green-500 hover:bg-green-600 p-2 rounded font-bold">Proceed</button>
         </form>
       </div>
     </div>
