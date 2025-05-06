@@ -1,20 +1,34 @@
 import {useEffect, useState } from 'react';
+import axios from 'axios';
 import Cart from './Cart';
 
 const Navbar = () => {
     const [cart, setCart] = useState(false);
-
+    const [isLoggedin,setIsLoggedin]=useState(false);
     const displayCart=(e)=>{
         e.stopPropagation();
         setCart(!cart);        
     }
+    
+    const checkLoginStatus = async () => {
+        try {
+          const response = await axios.get('http://localhost:3000/checklogin', { withCredentials: true });
+          if (response.data.loggedIn) {
+            setIsLoggedin(true);
+          }
+        } catch (err) {
+          console.error('Error checking session status', err);
+        }
+      };
+    
+      useEffect(() => {
+        checkLoginStatus();
+      }, []);
 
-[]
     useEffect(() => {
         if (!cart) return;
 
         const handleClickOutside = (event) => {
-            // Ensure clicks on the cart button itself don't close the cart
             if (!event.target.closest(".cart-container") && !event.target.closest(".cart-button")) {
                 setCart(false);
             }
@@ -48,7 +62,9 @@ const Navbar = () => {
                 </ul>
                 <div className="flex space-x-4">
                     <img src="./images/cart.png" alt="cart" className="h-9 cursor-pointer" onClick={displayCart}/>
-                    <button className="h-10 " >👤 My Account</button>
+                    {isLoggedin?(<button className="h-10 cursor-pointer " >👤 Logout</button>):
+                        <button className="h-10 cursor-pointer " >👤 Login</button>
+                    }
                 </div>
             </nav>
 
