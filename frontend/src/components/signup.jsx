@@ -1,8 +1,12 @@
 import React, { use } from 'react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import axios from 'axios';
 
 const Signup = () => {
+
+  const navigate = useNavigate();
 
   const [name,setName]=useState('');
   const [email,setEmail]=useState('');
@@ -19,10 +23,9 @@ const Signup = () => {
       );
   
       alert(res.data.message); // Should say "Verification code sent"
-      setShowVerification(true); // Show input for code
+      navigate('/verify');
     } catch (err) {
       console.error(err);
-      alert('Signup failed.');
     }
   };
   
