@@ -41,6 +41,18 @@ app.post('/add-product', upload.single('image'), (req, res) => {
   const { name, description, price, category } = req.body;
   const image = req.file ? req.file.filename : null;
 
+  const checkSql = 'SELECT * FROM products WHERE name = ? AND category = ?';
+  db.query(checkSql, [name, category], (err, results) => {
+    if (err) {
+      console.error('Error checking for duplicate product:', err);
+      return res.status(500).json({ message: 'Database error during duplication check' });
+    }
+
+    if (results.length > 0) {
+      // Duplicate found
+      return res.json({ message: 'Product with same name and category already exists' });
+    }
+
   const sql = 'INSERT INTO products (name, description, price, category,imgaddress) VALUES (?, ?, ?, ?, ?)';
   db.query(sql, [name, description, price, category, image], (err, result) => {
     if (err) {
@@ -49,6 +61,7 @@ app.post('/add-product', upload.single('image'), (req, res) => {
     }
     res.status(200).json({ message: 'Product saved!', productId: result.insertId });
   });
+});
 });
 
 app.get('/home', (req, res) => {
@@ -65,13 +78,25 @@ app.get('/home', (req, res) => {
 app.post('/signup', (req, res) => {
   const { name, email, password } = req.body;
 
+  const checkEmailSql = 'SELECT * FROM users WHERE email = ?';
+  db.query(checkEmailSql, [email], (err, results) => {
+    if (err) {
+      console.error('Database error during email check:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    if (results.length > 0) {
+      return res.json({ message: 'Email already registered. Please log in.' ,exitsEmail: true});
+    }
+
   const code = crypto.randomInt(100000, 999999).toString();
 
   req.session.verification = { email, name, password, code };
 
   verificationEmail(email, code);
 
-  res.status(200).json({ message: 'Verification code sent to email' });
+  res.status(200).json({ message: 'Verification code sent to email' ,exitsEmail: false});
+});
 });
 
 app.post('/verify', async (req, res) => {
@@ -109,6 +134,10 @@ app.post('/verify', async (req, res) => {
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
 
+  if(email=="admin@gmail.com" && password=="admin"){
+    return res.json({ isAdmin: true});
+  }
+
   const sql = 'SELECT * FROM users WHERE email = ?';
   db.query(sql, [email], async (err, result) => {
     if (err) {
@@ -117,20 +146,45 @@ app.post('/login', (req, res) => {
     }
 
     if (result.length === 0) {
-      return res.status(400).json({ message: 'User not found.' });
+      return res.status(400).json({ message: 'User not found.' , isAdmin:false});
     }
 
     // Compare the password with the hashed password stored in the database
     const user = result[0];
+    
     const match = await bcrypt.compare(password, user.password);
 
     if (match) {
-      req.session.userId = user.id;  // Store the user's session
-      return res.status(200).json({ message: 'Login successful' });
+      
+      const code = crypto.randomInt(100000, 999999).toString();
+      req.session.user=user;
+      req.session.code=code;
+      verificationEmail(email, code);
+      res.status(200).json({ message: 'Verification code sent to email' });
     } else {
       return res.status(400).json({ message: 'Incorrect password.' });
     }
   });
+});
+
+app.post('/loginVerify', async (req, res) => {
+
+  const {code} =req.body;
+  if (!req.session.code) {
+    return res.status(400).json({ message: 'No verification session found.' });
+  }
+
+  const sessioncode = req.session.code;
+
+  if (code === sessioncode) {
+    req.session.userId = req.session.user.id;  
+    return res.json({ valid: true});
+  }
+
+  else{
+    return res.json({ valid: false});
+  }
+
 });
 
 app.get('/checklogin', (req, res) => {

@@ -16,7 +16,11 @@ const Login = () => {
         { email, password },
         { withCredentials: true }  // for cookie/session-based login
       );
-      navigate('/home'); // Redirect to homepage after successful login
+      if(res.data.isAdmin){
+        navigate('/add-product');
+      }else{
+      navigate('/loginVerify'); // Redirect to homepage after successful login
+      }
     } catch (err) {
       console.error(err);
       alert('Login failed. Please check your credentials.');

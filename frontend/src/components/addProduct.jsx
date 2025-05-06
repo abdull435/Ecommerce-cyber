@@ -20,11 +20,10 @@ const AddProduct = () => {
 
     try {
       const res = await axios.post('http://localhost:3000/add-product', data);
-      alert('Product added successfully!');
+      alert(res.data.message);
       console.log(res.data);
     } catch (err) {
       console.error(err);
-      alert('Failed to add product.');
     }
   };
 

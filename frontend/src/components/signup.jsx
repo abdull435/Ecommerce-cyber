@@ -22,8 +22,11 @@ const Signup = () => {
         { withCredentials: true }
       );
   
+      if(res.data.exitsEmail){
       alert(res.data.message); // Should say "Verification code sent"
+      }else{
       navigate('/verify');
+      }
     } catch (err) {
       console.error(err);
     }
