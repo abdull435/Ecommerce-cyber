@@ -5,6 +5,7 @@ const multer = require('multer');
 const cors = require('cors');
 const crypto = require('crypto');
 const session = require('express-session');
+const bcrypt = require('bcrypt');
 const path = require('path');
 const { on } = require('events');
 const app = express();
@@ -62,7 +63,7 @@ app.get('/home', (req, res) => {
 
 app.post('/signup', (req, res) => {
   const { name, email, password } = req.body;
-  console.log(name+email+password)
+
   const code = crypto.randomInt(100000, 999999).toString();
 
   req.session.verification = { email, name, password, code };
@@ -70,6 +71,65 @@ app.post('/signup', (req, res) => {
   verificationEmail(email, code);
 
   res.status(200).json({ message: 'Verification code sent to email' });
+});
+
+app.post('/verify', async (req, res) => {
+  const { code } = req.body;
+
+  if (!req.session.verification) {
+    return res.status(400).json({ message: 'No verification session found.' });
+  }
+
+  const { email, name, password, code: sessionCode } = req.session.verification;
+
+  if (code !== sessionCode) {
+    return res.status(400).json({ message: 'Invalid verification code.' });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10); // 10 = salt rounds
+
+    const sql = 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)';
+    db.query(sql, [name, email, hashedPassword], (err, result) => {
+      if (err) {
+        console.error('Database error during user registration:', err);
+        return res.status(500).json({ message: 'Failed to register user.' });
+      }
+
+      req.session.verification = null; // Clear session after success
+      return res.status(200).json({ message: 'Verification successful. Account created.' });
+    });
+  } catch (err) {
+    console.error('Error hashing password:', err);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
+});
+
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+
+  const sql = 'SELECT * FROM users WHERE email = ?';
+  db.query(sql, [email], async (err, result) => {
+    if (err) {
+      console.error('Database error during login:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    if (result.length === 0) {
+      return res.status(400).json({ message: 'User not found.' });
+    }
+
+    // Compare the password with the hashed password stored in the database
+    const user = result[0];
+    const match = await bcrypt.compare(password, user.password);
+
+    if (match) {
+      req.session.userId = user.id;  // Store the user's session
+      return res.status(200).json({ message: 'Login successful' });
+    } else {
+      return res.status(400).json({ message: 'Incorrect password.' });
+    }
+  });
 });
 
 app.listen(PORT, () => {
