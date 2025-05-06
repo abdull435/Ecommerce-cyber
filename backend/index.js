@@ -6,11 +6,13 @@ const cors = require('cors');
 const crypto = require('crypto');
 const session = require('express-session');
 const path = require('path');
+const { on } = require('events');
 const app = express();
 const PORT = 3000;
 
-app.use(cors());
 app.use(express.json());  
+
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
@@ -56,6 +58,18 @@ app.get('/home', (req, res) => {
     }
     res.status(200).json({p : result});
   });
+});
+
+app.post('/signup', (req, res) => {
+  const { name, email, password } = req.body;
+  console.log(name+email+password)
+  const code = crypto.randomInt(100000, 999999).toString();
+
+  req.session.verification = { email, name, password, code };
+
+  verificationEmail(email, code);
+
+  res.status(200).json({ message: 'Verification code sent to email' });
 });
 
 app.listen(PORT, () => {
