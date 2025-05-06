@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Checkout = () => {
+    const navigate = useNavigate();
   const [form, setForm] = useState({
     email: '',
     name: '',
@@ -11,7 +13,7 @@ const Checkout = () => {
   });
 
   const [subTotal,setSubTotal]=useState(0);
-const [total,setTotal]=useState(0);
+  const [total,setTotal]=useState(0);
   const [cartData, setCartData] = useState([]);
 
   useEffect(() => {
@@ -45,7 +47,7 @@ const [total,setTotal]=useState(0);
         cart: cartData
       }, { withCredentials: true });
 
-      alert(orderRes.data.message);
+      navigate('/home');
       // Optionally clear cart or redirect
     } catch (err) {
       console.error("Checkout failed:", err);
@@ -70,7 +72,7 @@ const [total,setTotal]=useState(0);
             <option value="cash">Cash on Delivery</option>
           </select>
 
-          <button type="submit" className="bg-green-500 hover:bg-green-600 p-2 rounded font-bold">Proceed</button>
+          <button type="submit" className="bg-green-500 hover:bg-green-600 p-2 rounded font-bold">Order Place</button>
         </form>
       </div>
     </div>

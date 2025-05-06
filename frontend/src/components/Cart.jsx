@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 const Cart=()=>{
 
+    const navigate = useNavigate();
     const [cartData,setCartData]=useState([]);
     const [subTotal,setSubTotal]=useState(0);
     const [total,setTotal]=useState(0);
+
+    const goCheckout=()=>{
+        if(cartData.length>0){
+            navigate('/checkout');
+        }
+    }
     
     const increase = (index) => {
         setCartData(prv=>(            
@@ -111,7 +119,7 @@ const Cart=()=>{
             <p className="flex justify-between text-sm"><span>Tax (15%)</span> <span>Rs. {subTotal*0.15}</span></p>
             <p className="flex justify-between font-bold text-lg mt-2"><span>Grand Total</span> <span>Rs. {total}</span></p>
         </div>
-        <button className="bg-lime-600 text-white w-full py-2 rounded-lg mt-4">Checkout</button>
+        <button onClick={()=>goCheckout()} className="bg-lime-600 text-white w-full py-2 rounded-lg mt-4 cursor-pointer">Checkout</button>
     </div>
     );
 }

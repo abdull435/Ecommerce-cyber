@@ -209,6 +209,50 @@ app.put('/update-cart', (req, res) => {
   res.json({ message: 'Cart updated successfully', cart });
 });
 
+app.post('/create-order', (req, res) => {
+  const { email, name, city, address, paymentMethod, total } = req.body;
+  const userId = req.session.userId;
+  const cart = req.session.cart || [];
+
+  // Insert into orders table
+  db.query(
+    "INSERT INTO orders (userId, name, email, city, address, paymentMethod, total) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [userId, name, email, city, address, paymentMethod, total],
+    (err, orderResult) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Order failed" });
+      }
+
+      const orderId = orderResult.insertId;
+
+      // Insert each cart item into orderdetail table
+      const insertItem = (index) => {
+        if (index >= cart.length) {
+          req.session.cart = [];
+          return res.json({ message: "Order placed successfully" });
+        }
+
+        const item = cart[index];
+        db.query(
+          "INSERT INTO orderdetail (orderId, name, description, quantity, pricePerItem, charges, tax, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+          [orderId, item.name, item.description, item.quantity, item.pricePerItem, 150, item.total*0.15, item.total],
+          (err) => {
+            if (err) {
+              console.error(err);
+              return res.status(500).json({ message: "Failed to insert order item" });
+            }
+            insertItem(index + 1);
+          }
+        );
+      };
+
+      insertItem(0);
+    }
+  );
+});
+
+
 
 
 app.listen(PORT, () => {
