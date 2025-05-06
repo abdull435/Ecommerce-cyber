@@ -11,7 +11,7 @@ const { on } = require('events');
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());  
+app.use(express.json());
 
 app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 
@@ -41,7 +41,7 @@ app.post('/add-product', upload.single('image'), (req, res) => {
   const image = req.file ? req.file.filename : null;
 
   const sql = 'INSERT INTO products (name, description, price, category,imgaddress) VALUES (?, ?, ?, ?, ?)';
-  db.query(sql, [name, description, price, category,image], (err, result) => {
+  db.query(sql, [name, description, price, category, image], (err, result) => {
     if (err) {
       console.error('Error inserting product:', err);
       return res.status(500).json({ message: 'Database error' });
@@ -57,7 +57,7 @@ app.get('/home', (req, res) => {
       console.error('Error fetching products:', err);
       return res.status(500).json({ message: 'Database error' });
     }
-    res.status(200).json({p : result});
+    res.status(200).json({ p: result });
   });
 });
 
@@ -159,21 +159,34 @@ app.post('/add-to-cart', (req, res) => {
 
   const { Name, Description, qty, Price, Total } = req.body;
 
+
+
   if (!req.session.cart) {
     req.session.cart = [];
   }
 
-  const cartItem = {
-    name: Name,
-    description: Description,
-    quantity: qty,
-    pricePerItem: Price,
-    total: Total
-  };
+  const existingItemIndex = req.session.cart.findIndex(item => item.name === Name);
 
-  req.session.cart.push(cartItem);
+  if (existingItemIndex !== -1) {
+    // If the item already exists, update the quantity and total price
+    req.session.cart[existingItemIndex].quantity += qty;
+    req.session.cart[existingItemIndex].total += Total;
+    // Optionally, update the price per item if needed
+    req.session.cart[existingItemIndex].pricePerItem = Price;
+  } else {
 
-  console.log(cartItem);
+    const cartItem = {
+      name: Name,
+      description: Description,
+      quantity: qty,
+      pricePerItem: Price,
+      total: Total
+    };
+    req.session.cart.push(cartItem);
+   
+  }
+  console.log(req.session.cart);
+
   res.status(200).json({ message: 'Item added to cart.', cart: req.session.cart });
 });
 
