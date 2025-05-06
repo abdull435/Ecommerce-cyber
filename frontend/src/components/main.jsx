@@ -16,8 +16,9 @@ const Main = () => {
             .catch(error => console.error("Error fetching data:", error));
     }, []);
 
-    const showDetails = (id) => {
-        setSelectedProduct(id);
+    const showDetails = (detail) => {
+        console.log(detail);
+        setSelectedProduct(detail);
     };
 
     const closeDetail = () => {

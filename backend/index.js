@@ -151,6 +151,33 @@ app.post('/logout', (req, res) => {
   });
 });
 
+app.post('/add-to-cart', (req, res) => {
+  console.log(req.body.Description);
+  // if (!req.session.userId) {
+  //   return res.status(401).json({ message: 'Please log in to add items to cart.' });
+  // }
+
+  const { Name, Description, qty, Price, Total } = req.body;
+
+  if (!req.session.cart) {
+    req.session.cart = [];
+  }
+
+  const cartItem = {
+    name: Name,
+    description: Description,
+    quantity: qty,
+    pricePerItem: Price,
+    total: Total
+  };
+
+  req.session.cart.push(cartItem);
+
+  console.log(cartItem);
+  res.status(200).json({ message: 'Item added to cart.', cart: req.session.cart });
+});
+
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

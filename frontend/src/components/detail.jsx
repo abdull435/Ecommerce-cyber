@@ -3,24 +3,12 @@ import axios from "axios";
 
 const Detail = ({ product, close }) => {
 
-    const [productDetail, setProductDetail] = useState(null);
-    const [selectedProduct,setSelectedProduct]= useState();    
+    const productId = product.id;
+    const productName = product.name;
+    const productDescription = product.description;
     const [quantity,setQuantity]=useState(1);
     const [price,setPrice]=useState(null);
     const [totalprice,setTotalPrice]=useState();
-
-    useEffect(() => {
-        axios.get(`http://localhost:3000/home/get-detail?productid=${product.id}`)
-            .then(response => setProductDetail(response.data.details))
-            .catch(error => console.error("Error fetching data:", error));
-    },[product.id])
-
-    const selectedOption = (name,options)=>{
-        setSelectedProduct((prev) => ({
-            ...prev,
-            [name]: options,  // Store option under its type
-        }));
-    };
 
     const increase =()=>{
         setQuantity((prev)=>(prev+1)<26?prev+1:prev);
@@ -31,27 +19,13 @@ const Detail = ({ product, close }) => {
     };
 
     useEffect(() => {
-        let totalPrice = product.strting_price*quantity;
-        
-        if (selectedProduct) {
 
-            totalPrice=0;
-            Object.values(selectedProduct).forEach(option => {
-                totalPrice += option.price;
-            });
-
-            setPrice(totalPrice);
-            totalPrice*=quantity;
-            setTotalPrice(totalPrice);
-        }
-        else{
-            setPrice(totalPrice);
-            setTotalPrice(totalPrice);
-        }
-    }, [selectedProduct,quantity]);
+            setPrice(product.price);
+            setTotalPrice(product.price*quantity);
+    }, [quantity]);
 
     const addToCart =()=>{
-        axios.post(`http://localhost:3000/add-to-cart`,{Product: product,items: selectedProduct,qty: quantity,Price: price, Total: totalprice},{withCredentials: true})
+        axios.post(`http://localhost:3000/add-to-cart`,{Id: productId,Name: productName,Description: productDescription,qty: quantity,Price: price, Total: totalprice},{withCredentials: true})
         .catch(error => console.error("Error:", error));
     }
 
@@ -66,34 +40,12 @@ const Detail = ({ product, close }) => {
                 <div className="flex  ">
 
                     <div className=" md:w-1/2 p-4 flex justify-between flex-col">
-                        <img src="/./images/pizza.png" alt="Food Item" className="rounded-lg" />
-                        <h2 className="text-xl font-bold mt-4">{product.product_name}</h2>
-                        <p className="text-gray-500">1 Savour Krispo, 1 French Fries & 1 Drink</p>
+                        <img src={`http://localhost:3000/images/${product.imgaddress}`} alt="Food Item" className="rounded-lg" />
+                        <h2 className="text-xl font-bold mt-4">{product.name}</h2>
+                        <p className="text-gray-500">{product.description}</p>
                     </div>
 
                     <div className="md:w-1/2 p-4 flex flex-col justify-between">
-                        <div>
-                            {productDetail?.map((detail,index) => (
-                                
-                                <div className="border p-4 rounded-lg mt-2">
-                                    <div className="flex justify-between items-center cursor-pointer">
-                                        <p className="font-bold">{detail.option_type}</p>
-                                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">Required</span>
-                                    </div>
-                                    {detail.option_values?.map((options) =>(
-                                    <div id="" className="mt-2">
-                                        <label className="flex items-center space-x-2">
-                                            <input type="radio" name={`option-${index}`}
-                                               onChange={()=>selectedOption(detail.option_type,options)} 
-                                              className="text-pink-500"/>
-                                            <span>{options.name} - {options.price}</span>
-                                        </label>
-                                    </div>
-                                    ))}
-                                </div>
-                            ))}
-
-                        </div>
                         
                         <div>
                             <div className="flex justify-between items-center mt-4">
